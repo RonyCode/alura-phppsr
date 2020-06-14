@@ -2,14 +2,14 @@
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
-use Alura\Phpweb\Controller\InterfaceControlaRequisicao;
+use Psr\Http\Server\RequestHandlerInterface;
 use Nyholm\Psr7Server\ServerRequestCreator;
 use Nyholm\Psr7\Factory\Psr17Factory;
 
 $caminho = $_SERVER['PATH_INFO'];
 $rotas = require __DIR__ . '/../config/routes.php';
 
-if (!array_key_exists($caminho, $rotas)) {
+/* if (!array_key_exists($caminho, $rotas)) {
     http_response_code(404);
     exit();
 }
@@ -18,7 +18,7 @@ $ehRotaDeLogin = stripos($caminho, 'login');
 if (!isset($_SESSION['logado']) && $ehRotaDeLogin === false) {
     header('Location: /login');
     exit();
-}
+}*/
 
 $psr17Factory = new Psr17Factory();
 
@@ -33,12 +33,12 @@ $request = $creator->fromGlobals();
 
 $classControladora = $rotas[$caminho];
 /**
- * @var InterfaceControlaRequisicao $controlador
+ * @var RequestHandlerInterface $controlador
  */
 $controlador = new $classControladora();
-$resposta = $controlador->processaRequisicao($request);
+$resposta = $controlador->handle($request);
 
-foreach ($reposta->getHeaders() as $name => $values) {
+foreach ($resposta->getHeaders() as $name => $values) {
     foreach ($values as $value) {
         header(sprintf('%s: %s', $name, $value), false);
     }
